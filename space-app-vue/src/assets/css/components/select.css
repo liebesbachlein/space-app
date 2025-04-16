@@ -1,0 +1,42 @@
+.select-wrap {
+  position: relative;
+}
+
+.select-input {
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+}
+
+.select-input svg {
+  transition: transform 0.15s ease-out;
+}
+
+.select-wrap--active svg {
+  transform: rotate(180deg);
+}
+
+.select-option-list {
+  position: absolute;
+  top: 40px;
+  width: 100%;
+  height: fit-content;
+  max-height: 400x;
+  background-color: white;
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  z-index: 1;
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  padding: 5px;
+  overflow-y: auto;
+}
+
+.select-wrap--active .select-option-list {
+  display: flex;
+}
+
+.select-option-item {
+  width: 100%;
+}

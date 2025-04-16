@@ -1,0 +1,11 @@
+/* IMPORTING GLOBALS */
+@import './variables.css';
+@import './normalize.css';
+
+/* IMPORTING COMPONENTS */
+@import './components/page.css';
+@import './components/button.css';
+@import './components/input.css';
+@import './components/table.css';
+@import './components/select.css';
+@import './components/separator.css';

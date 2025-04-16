@@ -1,0 +1,89 @@
+.table {
+  width: fit-content;
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  background-color: white;
+}
+
+.table__header,
+.table__row {
+  height: 40px;
+}
+
+.table__header {
+  border-bottom: 1px solid var(--stroke);
+}
+
+.table__row {
+  border-bottom: 1px solid var(--fill);
+  transition: all 0.15s ease-out;
+}
+
+.table__row:hover {
+  background-color: var(--fill);
+}
+
+.table__row:last-child {
+  border-bottom: none;
+}
+
+.table__header-name,
+.table__entry {
+  padding: 9px 16px;
+  text-align: left;
+}
+
+.table__header-name {
+  font: 700 14px/20px var(--font-family);
+  border-left: 1px solid var(--stroke);
+}
+
+.table__header-name:first-child,
+.table__header--button {
+  border-left: none;
+}
+
+.table__entry {
+  font: 500 14px/20px var(--font-family);
+}
+
+.table__header--long {
+  width: 250px;
+}
+
+.table__header--medium {
+  width: 200px;
+}
+
+.table__header--short {
+  width: 64px;
+}
+
+.table__popup {
+  display: none;
+  background-color: white;
+  width: 200px;
+  padding: 5px;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 6px 0 #00000011;
+  position: absolute;
+  top: 24px;
+  z-index: 100;
+}
+
+.table__popup .button2 {
+  width: 100%;
+  text-align: left;
+}
+
+.table__button_popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.table__button_popup:hover .table__popup,
+.table__popup:hover {
+  display: block;
+}
