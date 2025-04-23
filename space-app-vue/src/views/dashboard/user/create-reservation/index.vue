@@ -267,7 +267,7 @@ onMounted(() => {
           </div>
           <label v-if="createReservationError" class="error-label">
             Error occurred while creating the reservation and payment process. Check if you have
-            enough money pn card
+            enough money on the card
           </label>
           <label v-else-if="createReservationSuccess" class="success-label">
             Successfully created reservation and processed a payment
