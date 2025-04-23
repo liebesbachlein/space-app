@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:n0="http://www.oracle.com/xml/ns/dbchangelog-ext"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro
+        http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+    <changeSet id="04-create-seq-to-user-profile-table-id" author="liebesbachlein">
+        <createSequence dataType="BIGINT"
+                        incrementBy="50"
+                        minValue="1"
+                        sequenceName="user_profile_seq_id"
+                        startValue="5"/>
+        <rollback>
+            <dropSequence sequenceName="user_profile_seq_id"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="04-create-user-profile-table" author="liebesbachlein">
+        <createTable tableName="user_profile">
+            <column name="id" type="BIGINT" defaultValueComputed="nextval('user_profile_seq_id')">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="role" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="user_profile"/>
+        </rollback>
+    </changeSet>
+    
+    <changeSet id="04-add-default-admin-to-user-profile-table" author="liebesbachlein">
+        <insert tableName="user_profile">
+            <column name="email" value="admin@space-app.com"/>
+            <column name="password" value="12345"/>
+            <column name="name" value="Admin"/>
+            <column name="role" value="ADMIN"/>
+        </insert>
+        <rollback/>
+    </changeSet>
+
+    <changeSet id="04-add-test-users-to-user-profile-table" author="liebesbachlein">
+        <insert tableName="user_profile">
+            <column name="email" value="test_johnwick@gmail.com"/>
+            <column name="password" value="12345"/>
+            <column name="name" value="Test John Wick"/>
+            <column name="role" value="User"/>
+        </insert>
+        <insert tableName="user_profile">
+            <column name="email" value="test_belova@gmail.com"/>
+            <column name="password" value="12345"/>
+            <column name="name" value="Test Yelena Belova"/>
+            <column name="role" value="User"/>
+        </insert>
+        <rollback/>
+    </changeSet>
+</databaseChangeLog>

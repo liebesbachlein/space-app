@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:n0="http://www.oracle.com/xml/ns/dbchangelog-ext"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro
+        http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+    <changeSet id="06-create-seq-to-space-table-id" author="liebesbachlein">
+        <createSequence dataType="INTEGER"
+                        incrementBy="50"
+                        minValue="1"
+                        sequenceName="space_seq_id"
+                        startValue="5"/>
+        <rollback>
+            <dropSequence sequenceName="space_seq_id"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="06-create-space-table" author="liebesbachlein">
+        <createTable tableName="space">
+            <column name="id" type="INTEGER" defaultValueComputed="nextval('space_seq_id')">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="space_type_id" type="INTEGER">
+                <constraints nullable="false" />
+            </column>
+            <column name="price" type="DECIMAL">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint  baseColumnNames="space_type_id"
+                                  baseTableName="space"
+                                  referencedColumnNames="id"
+                                  referencedTableName="space_type"
+                                  constraintName="fk_space_space_type"
+                                  onUpdate="CASCADE"/>
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="space" constraintName="fk_space_space_type" />
+            <dropTable tableName="space"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

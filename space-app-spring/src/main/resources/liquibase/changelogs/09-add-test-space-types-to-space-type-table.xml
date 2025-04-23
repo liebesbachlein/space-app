@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro
+        http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+    <changeSet id="09-add-test-space-types-to-space-type-table" author="liebesbachlein">
+        <insert tableName="space_type">
+            <column name="id" value="1"/>
+            <column name="name" value="Cubicles"/>
+        </insert>
+        <insert tableName="space_type">
+            <column name="id" value="2"/>
+            <column name="name" value="Shared Workspace"/>
+        </insert>
+        <insert tableName="space_type">
+            <column name="id" value="3"/>
+            <column name="name" value="Hybrid Openspace"/>
+        </insert>
+        <insert tableName="space_type">
+            <column name="id" value="4"/>
+            <column name="name" value="Conference Hall"/>
+        </insert>
+        <insert tableName="space_type">
+            <column name="id" value="5"/>
+            <column name="name" value="Private Room"/>
+        </insert>
+        <insert tableName="space_type">
+            <column name="id" value="6"/>
+            <column name="name" value="Shared Desks"/>
+        </insert>
+        <insert tableName="space_type">
+            <column name="id" value="7"/>
+            <column name="name" value="Open Air Area"/>
+        </insert>
+        <rollback>
+            <delete tableName="space_type">
+                <where>id in (1, 2, 3, 4, 5, 6, 7)</where>
+            </delete>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

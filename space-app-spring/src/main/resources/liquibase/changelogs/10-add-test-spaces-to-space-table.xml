@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro
+        http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+    <changeSet id="10-add-test-spaces-to-space-table" author="liebesbachlein">
+        <insert tableName="space">
+            <column name="name" value="Inspired by «Severence» series"/>
+            <column name="price" value="100"/>
+            <column name="space_type_id" value="1"/>
+        </insert>
+        <insert tableName="space">
+            <column name="name" value="Corporate Job Vibes"/>
+            <column name="price" value="45"/>
+            <column name="space_type_id" value="2"/>
+        </insert>
+        <insert tableName="space">
+            <column name="name" value="Like a Library"/>
+            <column name="price" value="18"/>
+            <column name="space_type_id" value="6"/>
+        </insert>
+        <insert tableName="space">
+            <column name="name" value="Pool, Red bull Vending Machine, and Wi-Fi"/>
+            <column name="price" value="200"/>
+            <column name="space_type_id" value="7"/>
+        </insert>
+        <rollback>
+            <delete tableName="space">
+                <where>name in ('Inspired by «Severence» series', 'Corporate Job Vibes',
+                    'Like a Library', 'Pool, Red bull Vending Machine, and Wi-Fi')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
