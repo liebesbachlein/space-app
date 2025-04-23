@@ -9,11 +9,7 @@
 
 <style lang="postcss">
 .Dashboard:has(main.Dashboard-Main-alt) {
-  position: relative;
-  display: grid;
   grid-template-columns: 238px 1fr 320px;
-  height: 100%;
-  overflow: auto;
 }
 
 .Dashboard-Main-alt ~ .Dashboard-Menu {

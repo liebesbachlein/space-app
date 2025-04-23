@@ -1,68 +1,73 @@
 <script setup lang="ts">
 import ModalWindow from '@/components/ModalWindow.vue'
-import axios from 'axios'
-import { reactive } from 'vue'
+import router from '@/router'
+import { useAuthStore } from '@/stores/auth'
+import type { ReactiveForm } from '@/util/reactiveForm'
+import { reactive, useTemplateRef } from 'vue'
 
-const register = reactive<{
-  name: {
-    input: string
-    error: string
-  }
+type RegisterForm = 'email' | 'password' | 'name'
+
+const registerForm: ReactiveForm<RegisterForm> = reactive({
   email: {
-    input: string
-    error: string
-  }
-  password: {
-    input: string
-    error: string
-  }
-}>({
-  email: {
-    input: '',
+    value: '',
     error: '',
   },
   password: {
-    input: '',
+    value: '',
     error: '',
   },
   name: {
-    input: '',
+    value: '',
     error: '',
   },
 })
 
 function validateName() {
   const RegEx = /^[a-zA-Z]{1,64}$/
-  register.name.error = RegEx.test(register.name.input)
+  registerForm.name.error = RegEx.test(registerForm.name.value)
     ? ''
     : 'Required field, enter valid name (latin only, 1-64 length)'
-  return register.name.error.length == 0
+  return registerForm.name.error.length == 0
 }
 
 function validateEmail() {
   const RegEx =
     /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
-  register.email.error = RegEx.test(register.email.input) ? '' : 'Required field, enter valid email'
-  return register.email.error.length == 0
+  registerForm.email.error = RegEx.test(registerForm.email.value)
+    ? ''
+    : 'Required field, enter valid email'
+  return registerForm.email.error.length == 0
 }
 
 function validatePassword() {
   const RegEx = /^[a-zA-Z0-9!@#$%^&*]{5,16}$/
-  register.password.error = RegEx.test(register.password.input)
+  registerForm.password.error = RegEx.test(registerForm.password.value)
     ? ''
     : 'Required field, enter valid password (latin/numbers/special symbols only, 5-16 length)'
-  return register.password.error.length == 0
+  return registerForm.password.error.length == 0
 }
+
+const modal = useTemplateRef<{ triggerAnimation: () => void }>('modal')
+
+const { useRegister } = useAuthStore()
+const { register, error, loading } = useRegister()
 
 function handleRegister() {
   if (validateName() && validateEmail() && validatePassword()) {
+    register(registerForm.name.value, registerForm.email.value, registerForm.password.value, () => {
+      modal.value?.triggerAnimation()
+    })
   }
 }
 </script>
 
 <template>
   <div class="page-layout page-background">
-    <ModalWindow header="register" subheader="Some important register info here so read please">
+    <ModalWindow
+      ref="modal"
+      header="Cretate an account"
+      subheader="Some important register info here so read please"
+    >
       <div class="form">
         <div class="form-inputs">
           <div class="input-wrap">
@@ -73,9 +78,11 @@ function handleRegister() {
               name="name"
               id="name"
               class="input"
-              v-model="register.name.input"
+              v-model="registerForm.name.value"
             />
-            <label v-if="register.name.error" class="error-label">{{ register.name.error }}</label>
+            <label v-if="registerForm.name.error" class="error-label">{{
+              registerForm.name.error
+            }}</label>
           </div>
           <div class="input-wrap">
             <label for="email" class="label">Email</label>
@@ -85,10 +92,10 @@ function handleRegister() {
               name="email"
               id="email"
               class="input"
-              v-model="register.email.input"
+              v-model="registerForm.email.value"
             />
-            <label v-if="register.email.error" class="error-label">{{
-              register.email.error
+            <label v-if="registerForm.email.error" class="error-label">{{
+              registerForm.email.error
             }}</label>
           </div>
           <div class="input-wrap">
@@ -99,25 +106,26 @@ function handleRegister() {
               name="password"
               id="password"
               class="input"
-              v-model="register.password.input"
+              v-model="registerForm.password.value"
             />
-            <label v-if="register.password.error" class="error-label">{{
-              register.password.error
+            <label v-if="registerForm.password.error" class="error-label">{{
+              registerForm.password.error
             }}</label>
           </div>
         </div>
         <div class="form-buttons">
-          <RouterLink to="/register" v-slot="{ href }" custom>
-            <a :href="href" class="button1 button-animation button1--outlined">
-              <span>Create an account</span>
-            </a>
-          </RouterLink>
-          <RouterLink to="/register" v-slot="{ href }" custom>
-            <a :href="href" class="button1 button-animation">
-              <span>Log in</span>
-            </a>
-          </RouterLink>
+          <RouterLink to="/login" class="button1 button-animation button1--outlined"
+            >Have an account?</RouterLink
+          >
+          <button
+            @click="handleRegister"
+            class="button1 button-animation"
+            :class="{ 'button--loading': loading }"
+          >
+            Create an account
+          </button>
         </div>
+        <label class="error-label" v-if="error">{{ error.message }}</label>
       </div>
     </ModalWindow>
   </div>

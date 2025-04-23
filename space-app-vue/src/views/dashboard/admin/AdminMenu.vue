@@ -1,48 +1,44 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-const route = useRoute()
+import { useAuthStore } from '@/stores/auth'
+import router from '@/router'
+const { user, useLogout } = useAuthStore()
+const { logout } = useLogout()
+
+function handleLogout() {
+  logout(() => {
+    router.push('/')
+  })
+}
 </script>
 
 <template>
   <nav class="AdminMenu">
     <div class="AdminMenu-header AdminMenu-padded">
-      <h3 style="padding: 0 8px">Admin1</h3>
+      <h3 style="padding: 0 8px">{{ user?.name }}</h3>
     </div>
     <div class="separator"></div>
     <div class="AdminMenu-links AdminMenu-padded">
-      <RouterLink to="/admin/spaces" v-slot="{ href }" custom>
-        <a
-          :href="href"
-          class="button2 button-animation"
-          :class="{ 'button2--active': route.path == href }"
-        >
-          <span>Spaces</span>
-        </a>
+      <RouterLink
+        to="/admin/spaces"
+        class="button2 button-animation"
+        active-class="button2--active"
+      >
+        Spaces
       </RouterLink>
-      <RouterLink to="/admin/space/create" v-slot="{ href }" custom>
-        <a
-          :href="href"
-          class="button2 button-animation"
-          :class="{ 'button2--active': route.path == href }"
-        >
-          <span>Create a space</span>
-        </a>
+      <RouterLink
+        to="/admin/space/create"
+        class="button2 button-animation"
+        active-class="button2--active"
+      >
+        Create a space
       </RouterLink>
-      <RouterLink to="/admin/users" v-slot="{ href }" custom>
-        <a
-          :href="href"
-          class="button2 button-animation"
-          :class="{ 'button2--active': route.path == href }"
-        >
-          <span>Users</span>
-        </a>
-      </RouterLink>
+      <!--<RouterLink to="/admin/users" class="button2 button-animation" active-class="button2--active">
+        Users
+      </RouterLink>-->
     </div>
     <div class="separator"></div>
     <div class="AdminMenu-links AdminMenu-padded">
-      <button @click="" class="button3 button3--red button-animation">
-        <span>Logout</span>
-      </button>
+      <button @click="handleLogout()" class="button3 button3--red button-animation">Logout</button>
     </div>
   </nav>
 </template>

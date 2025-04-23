@@ -1,24 +1,19 @@
 <script setup lang="ts">
 import ModalWindow from '@/components/ModalWindow.vue'
-import axios from 'axios'
-import { reactive } from 'vue'
+import router from '@/router'
+import { useAuthStore } from '@/stores/auth'
+import type { ReactiveForm } from '@/util/reactiveForm'
+import { reactive, useTemplateRef } from 'vue'
 
-const login = reactive<{
+type LoginForm = 'email' | 'password'
+
+const loginForm: ReactiveForm<LoginForm> = reactive({
   email: {
-    input: string
-    error: string
-  }
-  password: {
-    input: string
-    error: string
-  }
-}>({
-  email: {
-    input: '',
+    value: '',
     error: '',
   },
   password: {
-    input: '',
+    value: '',
     error: '',
   },
 })
@@ -26,27 +21,41 @@ const login = reactive<{
 function validateEmail() {
   const RegEx =
     /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
-  login.email.error = RegEx.test(login.email.input) ? '' : 'Required field, enter valid email'
-  return login.email.error.length == 0
+  loginForm.email.error = RegEx.test(loginForm.email.value)
+    ? ''
+    : 'Required field, enter valid email'
+  return loginForm.email.error.length == 0
 }
 
 function validatePassword() {
   const RegEx = /^[a-zA-Z0-9!@#$%^&*]{5,16}$/
-  login.password.error = RegEx.test(login.password.input)
+  loginForm.password.error = RegEx.test(loginForm.password.value)
     ? ''
     : 'Required field, enter valid password (latin/numbers/special symbols only, 5-16 length)'
-  return login.password.error.length == 0
+  return loginForm.password.error.length == 0
 }
+
+const modal = useTemplateRef<{ triggerAnimation: () => void }>('modal')
+
+const { useLogin } = useAuthStore()
+const { login, error, loading } = useLogin()
 
 function handleLogin() {
   if (validateEmail() && validatePassword()) {
+    login(loginForm.email.value, loginForm.password.value, () => {
+      modal.value?.triggerAnimation()
+    })
   }
 }
 </script>
 
 <template>
   <div class="page-layout page-background">
-    <ModalWindow header="Login" subheader="Some important login info here so read please">
+    <ModalWindow
+      ref="modal"
+      header="Login"
+      subheader="Some important login info here so read please"
+    >
       <div class="form">
         <div class="form-inputs">
           <div class="input-wrap">
@@ -57,9 +66,11 @@ function handleLogin() {
               name="email"
               id="email"
               class="input"
-              v-model="login.email.input"
+              v-model="loginForm.email.value"
             />
-            <label v-if="login.email.error" class="error-label">{{ login.email.error }}</label>
+            <label v-if="loginForm.email.error" class="error-label">{{
+              loginForm.email.error
+            }}</label>
           </div>
           <div class="input-wrap">
             <label for="password" class="label">Password</label>
@@ -69,25 +80,26 @@ function handleLogin() {
               name="password"
               id="password"
               class="input"
-              v-model="login.password.input"
+              v-model="loginForm.password.value"
             />
-            <label v-if="login.password.error" class="error-label">{{
-              login.password.error
+            <label v-if="loginForm.password.error" class="error-label">{{
+              loginForm.password.error
             }}</label>
           </div>
         </div>
         <div class="form-buttons">
-          <RouterLink to="/register" v-slot="{ href }" custom>
-            <a :href="href" class="button1 button-animation button1--outlined">
-              <span>Create an account</span>
-            </a>
-          </RouterLink>
-          <RouterLink to="/login" v-slot="{ href }" custom>
-            <a :href="href" class="button1 button-animation">
-              <span>Log in</span>
-            </a>
-          </RouterLink>
+          <RouterLink to="/register" class="button1 button-animation button1--outlined"
+            >Create an account</RouterLink
+          >
+          <button
+            @click="handleLogin"
+            class="button1 button-animation"
+            :class="{ 'button--loading': loading }"
+          >
+            Log in
+          </button>
         </div>
+        <label class="error-label" v-if="error">{{ error.message }}</label>
       </div>
     </ModalWindow>
   </div>

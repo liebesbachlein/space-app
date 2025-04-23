@@ -12,6 +12,7 @@
 .input {
   position: relative;
   height: 36px;
+  min-height: fit-content;
   border-radius: var(--radius);
   color: var(--black);
   font: 400 14px/20px var(--font-family);
@@ -41,11 +42,19 @@
 .label {
   color: var(--black);
   font: 500 14px/20px var(--font-family);
+  width: 350px;
 }
 
 .error-label {
   color: var(--red);
   font: 500 14px/18px var(--font-family);
+  width: 350px;
+}
+
+.success-label {
+  color: var(--green);
+  font: 500 14px/18px var(--font-family);
+  width: 350px;
 }
 
 .form {
@@ -59,7 +68,7 @@
   width: 100%;
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .form-inputs {

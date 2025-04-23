@@ -1,12 +1,29 @@
 <script setup lang="ts">
+import { ref, useTemplateRef } from 'vue'
+
 const props = defineProps<{
   header: string
   subheader: string
 }>()
+
+const modal = useTemplateRef<HTMLElement>('modal')
+
+const triggerAnimation = () => {
+  if (modal.value) {
+    modal.value.classList.remove('ModalWindow-animation')
+    setTimeout(() => {
+      if (modal.value) modal.value.classList.add('ModalWindow-animation')
+    }, 50)
+  }
+}
+
+defineExpose({
+  triggerAnimation,
+})
 </script>
 
 <template>
-  <div class="page-center-lock ModalWindow-backdrop">
+  <div ref="modal" class="page-center-lock ModalWindow-backdrop ModalWindow-animation">
     <div class="ModalWindow">
       <div class="ModalWindow-top">
         <h3 class="ModalWindow-header">{{ props.header }}</h3>
@@ -49,7 +66,10 @@ const props = defineProps<{
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
-  animation: 0.5s ease-out 0s 1 ModalWindow-appearance;
+
+  &-animation {
+    animation: 0.5s ease-out 0s 1 ModalWindow-appearance;
+  }
 
   &-backdrop {
     backdrop-filter: blur(5px);
@@ -63,11 +83,13 @@ const props = defineProps<{
     font: 600 18px/28px var(--font-family);
     color: var(--black);
     margin-bottom: 8px;
+    width: 350px;
   }
 
   &-subheader {
     font: 400 14px/20px var(--font-family);
     color: var(--grey);
+    width: 350px;
   }
 
   &-content {
@@ -81,7 +103,7 @@ const props = defineProps<{
   &-buttons {
     display: flex;
     gap: 8px;
-    justify-content: flex-end;
+    justify-content: center;
     width: 100%;
   }
 }

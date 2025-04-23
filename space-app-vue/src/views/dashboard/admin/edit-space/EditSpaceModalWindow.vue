@@ -2,108 +2,103 @@
 import { icons } from '@/assets/icons/icons'
 import Icon from '@/components/Icon.vue'
 import ModalWindow from '@/components/ModalWindow.vue'
-import DashboardLayoutContent from '@/layouts/DashboardLayoutContent.vue'
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import type { Space } from '../spaces/index.vue'
-
-const props = defineProps<{
-  space: Space
-}>()
-
-const emits = defineEmits(['close'])
-
-const editSpaceForm = reactive<{
-  name: {
-    input: string
-    error: string
-  }
-  typeId: {
-    input: string
-    error: string
-  }
-  price: {
-    input: string
-    error: string
-  }
-}>({
-  name: {
-    input: props.space.name,
-    error: '',
-  },
-  typeId: {
-    input: props.space.type.id.toString(),
-    error: '',
-  },
-  price: {
-    input: props.space.price.toString(),
-    error: '',
-  },
-})
-
-function validateName() {
-  const RegEx = /^[a-zA-Z0-9 ]{5,64}$/
-  editSpaceForm.name.error = RegEx.test(editSpaceForm.name.input)
-    ? ''
-    : 'Required field, enter valid name (latin letters/digits only, 5-64 length)'
-  return editSpaceForm.name.error.length == 0
-}
-
-function validateTypeId() {
-  const RegEx = /^[0-9]+$/
-  editSpaceForm.typeId.error = RegEx.test(editSpaceForm.typeId.input) ? '' : 'Required field'
-  return editSpaceForm.typeId.error.length == 0
-}
-
-function validatePrice() {
-  const RegEx = /^[1-9][0-9]*$/
-  editSpaceForm.price.error = RegEx.test(editSpaceForm.price.input)
-    ? ''
-    : 'Required field, enter valid price'
-  return editSpaceForm.price.error.length == 0
-}
-
-function handleEditSpace() {
-  if (validateName() && validateTypeId() && validatePrice()) {
-  }
-}
+import type { SpaceType } from '../create-space/index.vue'
+import { useFetch } from '@/composables/useFetch'
+import apiClient from '@/services/api'
+import { mapReactiveFormToQuery, type ReactiveForm } from '@/util/reactiveForm'
 
 interface Type {
   id: number
   name: string
 }
 
-const typeList: Type[] = [
-  {
-    id: 1,
-    name: 'Hello',
-  },
-  {
-    id: 2,
-    name: 'He56o',
-  },
-  {
-    id: 3,
-    name: '46Hello',
-  },
-  {
-    id: 4,
-    name: 'He98llo',
-  },
-]
+const props = defineProps<{
+  space: Space | null
+  spaceTypes: SpaceType[]
+}>()
 
-function selectType(type: Type) {
-  editSpaceForm.typeId.input = type.id.toString()
-  typeListVisibility.value = false
-}
+const emits = defineEmits(['abort', 'complete'])
 
-const selectedTypeName = computed(() => {
-  const res = typeList
-    .filter((e) => e.id.toString() == editSpaceForm.typeId.input)
-    .map((e) => e.name)
-  return res.pop() ?? 'Select type'
+const form: ReactiveForm<'name' | 'typeId' | 'price'> = reactive({
+  name: {
+    value: props.space?.name ?? '',
+    error: '',
+  },
+  typeId: {
+    value: props.space?.typeId.toString() ?? '',
+    error: '',
+  },
+  price: {
+    value: props.space?.price.toString() ?? '',
+    error: '',
+  },
 })
 
-const typeListVisibility = ref(false)
+function validateName() {
+  const RegEx = /^[a-zA-Z0-9 «».,!?''""-]{5,64}$/
+  form.name.error = RegEx.test(form.name.value)
+    ? ''
+    : 'Required field, enter valid name (latin letters/digits only, 5-64 length)'
+  return form.name.error.length == 0
+}
+
+function validateTypeId() {
+  const RegEx = /^[0-9]+$/
+  form.typeId.error = RegEx.test(form.typeId.value) ? '' : 'Required field'
+  return form.typeId.error.length == 0
+}
+
+function validatePrice() {
+  const RegEx = /^[1-9][0-9]*$/
+  form.price.error = RegEx.test(form.price.value) ? '' : 'Required field, enter valid price'
+  return form.price.error.length == 0
+}
+
+const {
+  fetch: editSpace,
+  error: editSpaceError,
+  loading: editSpaceLoading,
+} = useFetch({
+  client: apiClient,
+  method: 'PUT',
+})
+
+function handleEditSpace() {
+  if (validateName() && validateTypeId() && validatePrice() && props.space) {
+    editSpace({
+      path: '/admin/space/' + props.space.id,
+      payload: mapReactiveFormToQuery(form),
+    }).then(() => {
+      emits('complete')
+      editSpaceError.value == null
+    })
+  }
+}
+
+function selectType(type: Type) {
+  form.typeId.value = type.id.toString()
+  visibilityOfSpaceTypeSelect.value = false
+}
+
+const nameOfSelectedSpaceType = computed(() => {
+  const res = props.spaceTypes.find((e) => e.id.toString() == form.typeId.value)?.name
+  return res ?? 'Select type'
+})
+
+const visibilityOfSpaceTypeSelect = ref(false)
+const selectWrap = ref<Element | null>(null)
+
+onMounted(() => {
+  document.addEventListener('click', (event: Event) => {
+    if (selectWrap.value && event) {
+      if (selectWrap.value.contains(event.target as Node)) {
+        visibilityOfSpaceTypeSelect.value = false
+      }
+    }
+  })
+})
 </script>
 
 <template>
@@ -118,11 +113,9 @@ const typeListVisibility = ref(false)
             name="name"
             id="name"
             class="input"
-            v-model="editSpaceForm.name.input"
+            v-model="form.name.value"
           />
-          <label v-if="editSpaceForm.name.error" class="error-label">{{
-            editSpaceForm.name.error
-          }}</label>
+          <label v-if="form.name.error" class="error-label">{{ form.name.error }}</label>
         </div>
         <div class="input-wrap">
           <label for="typeId" class="label">Type</label>
@@ -132,33 +125,35 @@ const typeListVisibility = ref(false)
             name="typeId"
             id="typeId"
             class="input"
-            v-model="editSpaceForm.typeId.input"
+            v-model="form.typeId.value"
           />
           <div
+            ref="selectWrap"
             class="select-wrap"
             :class="{
-              'select-wrap--active': typeListVisibility,
+              'select-wrap--active': visibilityOfSpaceTypeSelect,
             }"
           >
-            <div class="input select-input" @click="typeListVisibility = !typeListVisibility">
-              <span>{{ selectedTypeName }}</span>
+            <div
+              class="input select-input"
+              @click="visibilityOfSpaceTypeSelect = !visibilityOfSpaceTypeSelect"
+            >
+              <span>{{ nameOfSelectedSpaceType }}</span>
               <div class="input--icon">
                 <Icon :svg="icons.chevronDown" />
               </div>
             </div>
             <ul class="select-option-list">
               <li
-                v-for="typeItem in typeList"
+                v-for="spaceType in props.spaceTypes"
                 class="select-option-item button2"
-                @click="selectType(typeItem)"
+                @click="selectType(spaceType)"
               >
-                {{ typeItem.name }}
+                {{ spaceType.name }}
               </li>
             </ul>
           </div>
-          <label v-if="editSpaceForm.typeId.error" class="error-label">{{
-            editSpaceForm.typeId.error
-          }}</label>
+          <label v-if="form.typeId.error" class="error-label">{{ form.typeId.error }}</label>
         </div>
         <div class="input-wrap">
           <label for="price" class="label">Price</label>
@@ -168,17 +163,21 @@ const typeListVisibility = ref(false)
             name="price"
             id="price"
             class="input"
-            v-model="editSpaceForm.price.input"
+            v-model="form.price.value"
           />
-          <label v-if="editSpaceForm.price.error" class="error-label">{{
-            editSpaceForm.price.error
-          }}</label>
+          <label v-if="form.price.error" class="error-label">{{ form.price.error }}</label>
         </div>
       </div>
 
       <div class="form-buttons">
-        <button @click="emits('close')" class="button1 button-animation">Abort</button>
-        <button @click="handleEditSpace" class="button1 button-animation">Save changes</button>
+        <button @click="emits('abort')" class="button1 button-animation">Abort</button>
+        <button
+          @click="handleEditSpace"
+          class="button1 button-animation"
+          :class="{ 'button--loading': editSpaceLoading }"
+        >
+          Save changes
+        </button>
       </div>
     </div>
   </ModalWindow>

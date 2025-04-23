@@ -96,17 +96,10 @@ onMounted(() => {
           est laborum.
         </p>
         <div class="Landing-Banner-buttons">
-          <RouterLink to="/register" v-slot="{ href }" custom>
-            <a :href="href" class="button1 button-animation button1--outlined">
-              <span>Create an account</span>
-            </a>
+          <RouterLink to="/register" class="button1 button-animation button1--outlined"
+            >Create an account
           </RouterLink>
-
-          <RouterLink to="/login" v-slot="{ href }" custom>
-            <a :href="href" class="button1 button-animation">
-              <span>Log in</span>
-            </a>
-          </RouterLink>
+          <RouterLink to="/login" class="button1 button-animation">Log in </RouterLink>
         </div>
       </div>
     </div>
@@ -146,8 +139,8 @@ onMounted(() => {
     display: relative;
     width: 100%;
     max-width: 1000px;
-    height: 100%;
-    max-height: 500px;
+    height: fit-content;
+    min-height: 500px;
     background-color: #d4e6fa17;
     backdrop-filter: blur(50px);
     border-radius: var(--radius);

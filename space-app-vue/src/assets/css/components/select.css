@@ -21,7 +21,7 @@
   top: 40px;
   width: 100%;
   height: fit-content;
-  max-height: 400x;
+  max-height: 200px;
   background-color: white;
   border-radius: var(--radius);
   border: 1px solid var(--stroke);

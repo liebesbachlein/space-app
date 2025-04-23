@@ -55,6 +55,7 @@ const props = defineProps<{
     align-items: center;
     gap: 8px;
     width: 100%;
+    max-width: 500px;
   }
 
   &-buttons {

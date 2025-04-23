@@ -1,73 +1,133 @@
-import axios from 'axios'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import router from '@/router'
-import apiClient from '@/services/api'
 import type User from '@/types/User.ts'
-import type Error from '@/types/Error'
+import authClient from '@/services/auth'
+import { useFetch } from '@/composables/useFetch'
+import { useCookies } from 'vue3-cookies'
+import { jwtDecode } from 'jwt-decode'
+import router from '@/router'
+
+const { cookies } = useCookies()
+
+export interface AuthTokens {
+  accessToken: string
+  refreshToken: string
+}
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
-  const loading = ref<boolean>(false)
+  const token = ref<string | null>(null)
 
-  async function auth(): Promise<Error | null> {
-    let error: Error | null = null
-    loading.value = true
-    try {
-      await apiClient.get('/sanctum/csrf-cookie')
-      const response = await apiClient.get('/api/user/me')
-      user.value = response.data
-    } catch (errResponse: any) {
-      error = {
-        message: errResponse.message,
-        status: errResponse.response.status,
-      }
-      console.log(errResponse)
-    } finally {
-      loading.value = false
-    }
-    return error
+  function auth() {
+    const newToken = cookies.get('accessToken')
+    if (!newToken || newToken === 'undefined') return false
+    decodeJwt(newToken)
+    return user.value !== null
   }
 
-  async function login(email: string, password: string, callback: () => {}): Promise<Error | null> {
-    let error: Error | null = null
-    try {
-      await apiClient.get('/sanctum/csrf-cookie')
-      const response = await apiClient.post('/api/login', {
-        email: email,
-        password: password,
+  function useLogin() {
+    const { fetch, response, error, loading } = useFetch<AuthTokens>({
+      client: authClient,
+      path: '/auth/login',
+      method: 'POST',
+    })
+
+    const login = (email: string, password: string, onError: Function, onSuccess?: Function) => {
+      fetch({
+        payload: {
+          email: email,
+          password: password,
+        },
       })
-      user.value = response.data
-
-      callback()
-    } catch (errResponse: any) {
-      error = {
-        message: errResponse.message,
-        status: errResponse.response.status,
-      }
-      console.log(errResponse)
+        .then(() => {
+          if (response.value) decodeJwt(response.value.accessToken)
+          onSuccess ? onSuccess() : router.push(isAdmin() ? '/admin' : '/user')
+        })
+        .catch(() => {
+          onError()
+        })
     }
-    return error
+
+    return { login, error, loading }
   }
 
-  async function logout(callback: () => void): Promise<Error | null> {
-    let error: Error | null = null
-    try {
-      //await authClient.get("/sanctum/csrf-cookie");
-      await apiClient.post('/api/logout')
-      user.value = null
+  function useRegister() {
+    const { fetch, response, error, loading } = useFetch<AuthTokens>({
+      client: authClient,
+      path: '/auth/register',
+      method: 'POST',
+    })
 
-      callback()
-      router.push('/')
-    } catch (errResponse: any) {
-      error = {
-        message: errResponse.message,
-        status: errResponse.response.status,
-      }
-      console.log(errResponse)
+    const register = (
+      name: string,
+      email: string,
+      password: string,
+      onError: Function,
+      onSuccess?: Function,
+    ) => {
+      fetch({
+        payload: {
+          name: name,
+          email: email,
+          password: password,
+        },
+      }).then(() => {
+        if (response.value) {
+          decodeJwt(response.value.accessToken)
+          onSuccess ? onSuccess() : router.push('/user')
+        } else if (error.value) {
+          onError()
+        }
+      })
     }
-    return error
+
+    return { register, error, loading }
   }
 
-  return { user, loading, login, auth, logout }
+  function useLogout() {
+    const { fetch, response, error, loading } = useFetch<{
+      refreshToken: string
+    }>({
+      client: authClient,
+      path: '/auth/logout',
+      method: 'POST',
+    })
+
+    const logout = (callback: () => void) => {
+      fetch({
+        payload: {
+          refreshToken: cookies.get('refreshToken'),
+        },
+      }).then(() => {
+        callback()
+        cookies.remove('accessToken')
+        cookies.remove('refreshToken')
+        token.value = null
+        user.value = null
+      })
+    }
+
+    return { logout, error, loading }
+  }
+
+  function decodeJwt(jwt: string) {
+    token.value = jwt
+    const decoded = jwtDecode<{ sub: string; id: number; name: string; admin: boolean }>(jwt)
+    user.value = {
+      id: decoded.id,
+      email: decoded.sub,
+      name: decoded.name,
+      isAdmin: decoded.admin,
+    }
+  }
+
+  function isLoggedIn() {
+    return user.value !== null
+  }
+
+  function isAdmin() {
+    return user.value !== null && user.value.isAdmin
+  }
+
+  return { user, auth, useLogin, useRegister, useLogout, isLoggedIn, isAdmin }
 })
