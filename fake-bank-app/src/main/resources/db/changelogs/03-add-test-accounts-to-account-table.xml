@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:n0="http://www.oracle.com/xml/ns/dbchangelog-ext"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro
+        http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+    <changeSet id="02-add-test-accounts-to-account-table" author="liebesbachlein">
+        <insert tableName="account">
+            <column name="email" value="test_johnwick@gmail.com"/>
+            <column name="cvc" value="$2a$10$o5lpFMECBuFytz6wjUGS2OF5J1q7Hajjm.z288Xrn8X0DkgYwZV3O"/>
+            <column name="balance" value="15.75"/>
+        </insert>
+        <insert tableName="account">
+            <column name="email" value="test_belova@gmail.com"/>
+            <column name="cvc" value="$2a$10$cOLefUlKaPKAbBGxIinVJe75hmvWo.TdZSXXG5kEEkWBawW7nWZei"/>
+            <column name="balance" value="8515.5"/>
+        </insert>
+        <rollback/>
+    </changeSet>
+</databaseChangeLog>

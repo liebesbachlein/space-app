@@ -1,0 +1,21 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: app
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fake_bank
+    username: postgres
+    password: yaoi
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      show-sql: true
+      format-sql: true
+  liquibase:
+    change-log: /db/changelog-master.xml
+    enabled: true
+    drop-first: false
+    default-schema: public
