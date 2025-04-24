@@ -6,3 +6,4 @@ npm run dev
 
 Backend API Spring:
 Java Release 21 is needed for HttpClient try-wth-resources closing
+Create databases with names: space_app, fake_bank, fake_payment_gateway

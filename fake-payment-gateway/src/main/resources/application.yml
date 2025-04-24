@@ -7,13 +7,12 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/fake_payment_gateway
     username: postgres
-    password: yaoi
+    password: postgres
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
       show-sql: true
       format-sql: true
-
 
 app:
