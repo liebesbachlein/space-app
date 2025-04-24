@@ -54,7 +54,7 @@ function handleLogin() {
     <ModalWindow
       ref="modal"
       header="Login"
-      subheader="Some important login info here so read please"
+      subheader="Hint: Existing account: test_johnwick@gmail.com, test_belova@gmail.com, admin@space-app.com. All passords are -> password"
     >
       <div class="form">
         <div class="form-inputs">

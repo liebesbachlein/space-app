@@ -1,0 +1,113 @@
+services:
+  nginx:
+    image: nginx:alpine
+    build:
+      context: ./nginx
+    container_name: nginx
+    networks:
+      - local
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+      - frontend
+
+  frontend:
+    build:
+      context: ./space-app-vue
+      dockerfile: Dockerfile
+    container_name: frontend
+    image: node:lts-alpine
+    environment:
+      - VITE_API_URL = "http://localhost:8080/api"
+    ports:
+      - "5173:5173"
+    networks:
+      - local
+    volumes:
+      - ./space-app-vue/dist:/usr/share/nginx/html
+
+  backend:
+    container_name: backend
+    build:
+      context: /space-app-spring
+      dockerfile: Dockerfile
+    depends_on:
+      - liquibase-backend
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/backend
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    ports:
+      - "8080:8080"
+    networks:
+      - local
+
+  #   payment-gateway:
+  #     container_name: fake_payment_gateway
+  #     build:
+  #       context: /fake-payment-gateway
+  #       dockerfile: Dockerfile
+  #     depends_on:
+  #       - db
+  #     environment:
+  #       - SERVER_PORT: 8081
+  #       - SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/fake_payment_gateway
+  #       - SPRING_DATASOURCE_USERNAME: postgres
+  #       - SPRING_DATASOURCE_PASSWORD: postgres
+  #     ports:
+  #       - "8081:8081"
+  #     networks:
+  #       - local
+
+  #   bank:
+  #     container_name: fake_bank_app
+  #     build:
+  #       context: /fake-bank-app
+  #       dockerfile: Dockerfile
+  #     depends_on:
+  #       - db, liquibase_fake_bank_app
+  #     environment:
+  #       - SERVER_PORT: 8081
+  #       - SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/fake_bank_app
+  #       - SPRING_DATASOURCE_USERNAME: postgres
+  #       - SPRING_DATASOURCE_PASSWORD: postgres
+  #     ports:
+  #       - "8081:8081"
+  #     networks:
+  #       - local
+
+  db:
+    image: postgres:14
+    container_name: db
+    environment:
+      - POSTGRES_MULTIPLE_DATABASES=backend
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+
+  liquibase-backend:
+    container_name: liquibase-backend
+    image: liquibase/liquibase
+    command: --url=jdbc:postgresql://localhost:5432/app_backend?user=postgres&password=postgres --changeLogFile=changelog-master.xml update
+    volumes:
+      - ./space-app-spring/src/main/resources/db/changelog-master.xml:/liquibase/changelog.xml
+    depends_on:
+      - db
+
+  #   liquibase-bank:
+  #     container_name: liquibase_fake_bank_app
+  #     image: liquibase/liquibase
+  #     command: --url=jdbc:postgresql://localhost:5432/fake_bank_app?user=postgres&password=postgres --changeLogFile=changelog-master.xml update
+  #     volumes:
+  #       - ./fake-bank-app/src/main/resources/db/changelog-master.xml:/liquibase/changelog.xml
+  #     depends_on:
+  #       db:
+  #         condition: service_healthy
+
+networks:
+  local:
+    driver: bridge
